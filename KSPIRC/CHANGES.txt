@@ -1,0 +1,45 @@
+﻿0.6.0, 2013-11-26
+- You can now click on HTTP/HTTPS links in messages. (Note that this will
+  only work for the first link in the message.)
+- The plugin will now try to reconnect to the server when connection was lost.
+- All unknown user commands will now be sent to the server verbatim.
+- Added a "user" parameter to the configuration file to let you configure
+  the IRC server user account. This can be useful when using a bouncer.
+
+0.5.0, 2013-11-24
+- Pressing the TAB key will now auto-complete user names in the input
+  text field.
+- The last seen indicator line should now always be drawn in the correct
+  places.
+- You can now add a new line "debug = true" in the configuration file
+  to see all client-server communication.
+
+0.4.0, 2013-11-23
+- Added the /TOPIC, /OP, /DEOP, /VOICE, /DEVOICE, and /KICK user commands.
+- The users list can now be hidden.
+- Added an indicator to see which messages are new since you last left a
+  channel tab.
+- The window will no longer reset its size when clicking on another chat tab.
+- The "IRC" button and the window will now hide in the space center scene
+  to avoid the UI acting up.
+- Moved the "IRC" button higher up in all scenes except the editors, mainly to
+  not clash with the Kerbal face cams in the flight scene.
+
+0.3.0, 2013-11-23
+- The input text field will no longer grow if you type in a long text.
+- Channel tabs will be highlighted in a different color now when there are
+  new messages. The "IRC" button will also be highlighted if the IRC
+  window is currently hidden.
+- You can resize the window now.
+
+0.2.0, 2013-11-22
+- Added the /NICK command to change your nickname.
+- Added the /J user command as a synonym for /JOIN.
+- User channel modes (op, voice) are updated correctly now.
+- Other users joining the same channel are updated correctly now.
+- The number of users in the channel is displayed now.
+- The channel topic is displayed now.
+- A server password can be supplied in the config file now.
+
+0.1.0, 2013-11-21
+- Initial public release.
