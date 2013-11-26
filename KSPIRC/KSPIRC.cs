@@ -335,7 +335,7 @@ class KSPIRC : MonoBehaviour {
 	private void handleUserCommand(UserCommand cmd) {
 		if (userCommandHandlers.ContainsKey(cmd.command)) {
 			userCommandHandlers[cmd.command](cmd);
-		} else if (debug) {
+		} else {
 			client.send(cmd.command + " " + cmd.parameters);
 		}
 	}
