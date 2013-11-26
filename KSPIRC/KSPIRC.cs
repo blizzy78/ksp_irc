@@ -164,7 +164,7 @@ class KSPIRC : MonoBehaviour {
 
 	private void channelClosed(ChannelEvent e) {
 		if (e.handle.StartsWith("#")) {
-			client.send(new IRCCommand("PART", e.handle));
+			client.send(new IRCCommand(null, "PART", e.handle));
 		}
 	}
 
@@ -183,6 +183,8 @@ class KSPIRC : MonoBehaviour {
 	#region server commands
 
 	private void initCommandHandlers() {
+		IRCCommandHandler ignoreServerCommand = (cmd) => {};
+
 		serverCommandHandlers.Add("JOIN", serverCommandJOIN);
 		serverCommandHandlers.Add("KICK", serverCommandKICK);
 		serverCommandHandlers.Add("MODE", serverCommandMODE);
@@ -190,6 +192,7 @@ class KSPIRC : MonoBehaviour {
 		serverCommandHandlers.Add("NOTICE", serverCommandNOTICE);
 		serverCommandHandlers.Add("PART", serverCommandPART);
 		serverCommandHandlers.Add("PING", serverCommandPING);
+		serverCommandHandlers.Add("PONG", ignoreServerCommand);
 		serverCommandHandlers.Add("PRIVMSG", serverCommandPRIVMSG);
 		serverCommandHandlers.Add("QUIT", serverCommandQUIT);
 		serverCommandHandlers.Add("TOPIC", serverCommandTOPIC);
@@ -211,7 +214,7 @@ class KSPIRC : MonoBehaviour {
 	}
 
 	private void serverCommandPING(IRCCommand cmd) {
-		client.send(new IRCCommand("PONG", cmd.parameters[0]));
+		client.send(new IRCCommand(null, "PONG", cmd.parameters[0]));
 	}
 
 	private void serverCommandNOTICE(IRCCommand cmd) {
@@ -220,13 +223,14 @@ class KSPIRC : MonoBehaviour {
 
 	private void serverCommandPRIVMSG(IRCCommand cmd) {
 		string handle = cmd.parameters[0].StartsWith("#") ? cmd.parameters[0] : cmd.shortPrefix;
-		string sender = cmd.shortPrefix;
-		string text = cmd.parameters.Last();
-		if (text.StartsWith("\u0001ACTION ") && text.EndsWith("\u0001")) {
-			text = sender + " " + text.Substring(8, text.Length - 9);
-			sender = "*";
+		if (cmd is CTCPCommand) {
+			CTCPCommand c = (CTCPCommand) cmd;
+			if (c.ctcpCommand == "ACTION") {
+				ircWindow.addToChannel(handle, "*", cmd.shortPrefix + " " + c.ctcpParameters);
+			}
+		} else {
+			ircWindow.addToChannel(handle, cmd.shortPrefix, cmd.parameters.Last());
 		}
-		ircWindow.addToChannel(handle, sender, text);
 	}
 
 	private void serverCommandNameReply(IRCCommand cmd) {
@@ -339,7 +343,7 @@ class KSPIRC : MonoBehaviour {
 	private void userCommandME(UserCommand cmd) {
 		string handle = ircWindow.getCurrentChannelName();
 		if (cmd.parameters.Length > 0) {
-			client.send(new IRCCommand("PRIVMSG", handle, "\u0001ACTION " + cmd.parameters + "\u0001"));
+			client.send(new CTCPCommand(null, handle, "ACTION", cmd.parameters));
 			ircWindow.addToChannel(handle, "*", ircWindow.name + " " + cmd.parameters);
 		}
 	}
@@ -347,7 +351,7 @@ class KSPIRC : MonoBehaviour {
 	private void userCommandMSG(UserCommand cmd) {
 		string[] parts = cmd.parameters.Split(new char[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
 		if (parts.Length == 2) {
-			client.send(new IRCCommand("PRIVMSG", parts[0], parts[1]));
+			client.send(new IRCCommand(null, "PRIVMSG", parts[0], parts[1]));
 			ircWindow.addToChannel(parts[0], ircWindow.name, parts[1]);
 		}
 	}
@@ -359,7 +363,7 @@ class KSPIRC : MonoBehaviour {
 	private void userCommandTOPIC(UserCommand cmd) {
 		string handle = ircWindow.getCurrentChannelName();
 		if ((cmd.parameters.Length > 0) && (handle != null) && handle.StartsWith("#")) {
-			client.send(new IRCCommand("TOPIC", handle, cmd.parameters));
+			client.send(new IRCCommand(null, "TOPIC", handle, cmd.parameters));
 		}
 	}
 
@@ -392,7 +396,7 @@ class KSPIRC : MonoBehaviour {
 	}
 
 	private void sendUserChannelMode(string handle, string name, string mode) {
-		client.send(new IRCCommand("MODE", handle, mode, name));
+		client.send(new IRCCommand(null, "MODE", handle, mode, name));
 	}
 
 	private void userCommandKICK(UserCommand cmd) {
@@ -400,9 +404,9 @@ class KSPIRC : MonoBehaviour {
 		string[] parts = cmd.parameters.Split(new char[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
 		if (parts.Length > 0) {
 			if (parts.Length == 1) {
-				client.send(new IRCCommand("KICK", handle, parts[0]));
+				client.send(new IRCCommand(null, "KICK", handle, parts[0]));
 			} else {
-				client.send(new IRCCommand("KICK", handle, parts[0], parts.Last()));
+				client.send(new IRCCommand(null, "KICK", handle, parts[0], parts.Last()));
 			}
 		}
 	}

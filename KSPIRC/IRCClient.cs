@@ -68,10 +68,10 @@ class IRCClient {
 			stream = client.GetStream();
 
 			if ((serverPassword != null) && (serverPassword != "")) {
-				send(new IRCCommand("PASS", serverPassword));
+				send(new IRCCommand(null, "PASS", serverPassword));
 			}
-			send(new IRCCommand("NICK", nickname));
-			send(new IRCCommand("USER", user ?? nickname, "8", "*", nickname));
+			send(new IRCCommand(null, "NICK", nickname));
+			send(new IRCCommand(null, "USER", user ?? nickname, "8", "*", nickname));
 
 			connected = true;
 
@@ -93,7 +93,7 @@ class IRCClient {
 
 		if (stream != null) {
 			try {
-				send(new IRCCommand("QUIT", "Build. Fly. Dream."));
+				send(new IRCCommand(null, "QUIT", "Build. Fly. Dream."));
 			} catch {
 				// ignore
 			}

@@ -58,10 +58,7 @@ class IRCCommand {
 		private set;
 	}
 
-	public IRCCommand(string command, params string[] parameters) : this(null, command, parameters) {
-	}
-
-	private IRCCommand(string prefix, string command, params string[] parameters) {
+	public IRCCommand(string prefix, string command, params string[] parameters) {
 		this.prefix = prefix;
 		this.command = command;
 		this.parameters = parameters.Where(p => p != null).ToArray();
@@ -89,6 +86,17 @@ class IRCCommand {
 			string trailing = groups["trailing"].Value;
 			if (trailing != "") {
 				parameters.Add(trailing.Substring(1));
+			}
+
+			if ((command == "PRIVMSG") && (parameters.Count() >= 2)) {
+				string lastParam = parameters.Last();
+				if (lastParam.StartsWith("\u0001") && lastParam.EndsWith("\u0001")) {
+					lastParam = lastParam.Substring(1, lastParam.Length - 2);
+					int pos = lastParam.IndexOf(' ');
+					if (pos >= 0) {
+						return new CTCPCommand(prefix, parameters[0], lastParam.Substring(0, pos), lastParam.Substring(pos + 1));
+					}
+				}
 			}
 
 			return new IRCCommand(prefix, command, parameters.ToArray());
