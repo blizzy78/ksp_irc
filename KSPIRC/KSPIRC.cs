@@ -25,7 +25,7 @@ using UnityEngine;
 [KSPAddonFixed(KSPAddon.Startup.MainMenu, true, typeof(KSPIRC))]
 class KSPIRC : MonoBehaviour {
 	private const string NOTICE_CHANNEL_HANDLE = "(Notice)";
-	private const int VERSION = 6;
+	private const int VERSION = 7;
 
 	// debugging
 	private const string DEBUG_CHANNEL_HANDLE = "(Debug)";

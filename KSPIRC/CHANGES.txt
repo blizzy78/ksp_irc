@@ -1,4 +1,7 @@
-﻿0.6.0, 2013-11-26
+﻿0.6.1, 2013-11-27
+- Fixed a bug that prevented sending unknown commands the server.
+
+0.6.0, 2013-11-26
 - You can now click on HTTP/HTTPS links in messages. (Note that this will
   only work for the first link in the message.)
 - The plugin will now try to reconnect to the server when connection was lost.
