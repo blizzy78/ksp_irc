@@ -40,15 +40,13 @@ class KSPIRC : MonoBehaviour {
 	private Dictionary<string, UserCommandHandler> userCommandHandlers = new Dictionary<string, UserCommandHandler>();
 	private IRCClient client;
 	private IRCWindow ircWindow;
-	private RenderingManager renderingManager;
 	private WWW versionWWW;
 	private bool debug;
 	private IButton windowButton;
+	private bool showNewVersionOnButton;
 
 	KSPIRC() {
 		GameObject.DontDestroyOnLoad(this);
-
-		versionWWW = new WWW("http://blizzy.de/kspirc/version.txt");
 
 		string settingsFile = KSPUtil.ApplicationRootPath + "GameData/blizzy/KSPIRC/irc.cfg";
 		ConfigNode settings = ConfigNode.Load(settingsFile) ?? new ConfigNode();
@@ -86,6 +84,8 @@ class KSPIRC : MonoBehaviour {
 		windowButton.ToolTip = "IRC";
 		windowButton.Visibility = new GameScenesVisibility(GameScenes.EDITOR, GameScenes.FLIGHT, GameScenes.SPH, GameScenes.TRACKSTATION);
 		windowButton.OnClick += (e) => toggleIRCWindow();
+
+		versionWWW = new WWW("http://blizzy.de/kspirc/version.txt");
 	}
 
 	public void OnDestroy() {
@@ -100,7 +100,7 @@ class KSPIRC : MonoBehaviour {
 			ircWindow.hidden = true;
 		}
 
-		if (ircWindow.hidden && ircWindow.anyChannelsHighlightedPrivateMessage) {
+		if (ircWindow.hidden && (ircWindow.anyChannelsHighlightedPrivateMessage || showNewVersionOnButton)) {
 			windowButton.TexturePath = "blizzy/KSPIRC/button-pm";
 		} else if (ircWindow.hidden && ircWindow.anyChannelsHighlightedMessage) {
 			windowButton.TexturePath = "blizzy/KSPIRC/button-message";
@@ -113,21 +113,13 @@ class KSPIRC : MonoBehaviour {
 		ircWindow.draw();
 	}
 
-	private bool showGUI() {
-		if (renderingManager == null) {
-			renderingManager = (RenderingManager) GameObject.FindObjectOfType(typeof(RenderingManager));
-		}
-
-		if (renderingManager != null) {
-			GameObject o = renderingManager.uiElementsToDisable.FirstOrDefault();
-			return (o == null) || o.activeSelf;
-		}
-
-		return false;
-	}
-
 	private void toggleIRCWindow() {
 		ircWindow.hidden = !ircWindow.hidden;
+
+		// reset this as soon as the window is opened
+		if (!ircWindow.hidden) {
+			showNewVersionOnButton = false;
+		}
 	}
 
 	#endregion
@@ -153,8 +145,13 @@ class KSPIRC : MonoBehaviour {
 	private void checkForNewVersion() {
 		if ((ircWindow.newVersionAvailable == null) && String.IsNullOrEmpty(versionWWW.error) && versionWWW.isDone) {
 			try {
+				Debug.Log("version found: " + versionWWW.text);
 				long ver = long.Parse(versionWWW.text);
 				ircWindow.newVersionAvailable = ver > VERSION;
+				if (ircWindow.newVersionAvailable == true) {
+					Debug.Log("new version found");
+					showNewVersionOnButton = true;
+				}
 			} catch (Exception) {
 				// ignore
 			}
