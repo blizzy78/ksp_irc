@@ -108,6 +108,8 @@ class KSPIRC : MonoBehaviour {
 		} else {
 			windowButton.TexturePath = "blizzy/KSPIRC/button-regular";
 		}
+
+		ircWindow.draw();
 	}
 
 	private bool showGUI() {

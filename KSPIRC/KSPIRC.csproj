@@ -74,6 +74,7 @@
     <None Include="etc\button-pm.tga" />
     <None Include="etc\button-regular.tga" />
     <None Include="etc\button.psd" />
+    <None Include="etc\resize-cursor.tga" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
