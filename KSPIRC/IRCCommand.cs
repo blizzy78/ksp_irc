@@ -95,6 +95,8 @@ class IRCCommand {
 					int pos = lastParam.IndexOf(' ');
 					if (pos >= 0) {
 						return new CTCPCommand(prefix, parameters[0], lastParam.Substring(0, pos), lastParam.Substring(pos + 1));
+					} else {
+						return new CTCPCommand(prefix, parameters[0], lastParam, null);
 					}
 				}
 			}

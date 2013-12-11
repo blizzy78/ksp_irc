@@ -27,6 +27,7 @@ using Toolbar;
 class KSPIRC : MonoBehaviour {
 	private const string NOTICE_CHANNEL_HANDLE = "(Notice)";
 	private const int VERSION = 7;
+	private const string FULL_VERSION = "0.6.1";
 
 	// debugging
 	private const string DEBUG_CHANNEL_HANDLE = "(Debug)";
@@ -208,6 +209,13 @@ class KSPIRC : MonoBehaviour {
 			CTCPCommand c = (CTCPCommand) cmd;
 			if (c.ctcpCommand == "ACTION") {
 				ircWindow.addToChannel(handle, "*", cmd.shortPrefix + " " + c.ctcpParameters);
+			} else if ((c.ctcpCommand == "VERSION") && !handle.StartsWith("#")) {
+				if (c.ctcpParameters == null) {
+					ircWindow.addToChannel(handle, "*", "VERSION");
+					client.send(new CTCPCommand(null, handle, "VERSION", "Internet Relay Chat Plugin " + FULL_VERSION + " for Kerbal Space Program"));
+				} else {
+					ircWindow.addToChannel(handle, "*", handle + " uses client: " + c.ctcpParameters);
+				}
 			}
 		} else {
 			ircWindow.addToChannel(handle, cmd.shortPrefix, cmd.parameters.Last());
