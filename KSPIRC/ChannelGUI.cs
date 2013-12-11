@@ -43,11 +43,15 @@ class ChannelGUI {
 		get;
 		private set;
 	}
-	public bool channelHighlightedNickname {
+	public bool channelHighlightedPrivateMessage {
 		get;
 		private set;
 	}
-	public bool channelHighlighted {
+	public bool channelHighlightedMessage {
+		get;
+		private set;
+	}
+	public bool channelHighlightedJoin {
 		get;
 		private set;
 	}
@@ -119,6 +123,7 @@ class ChannelGUI {
 		this.handle = handle;
 		this.name = name;
 
+		// prevent highlighting in "(Debug)" or "(Notice)" channels
 		highlightName = handle.StartsWith("#");
 	}
 
@@ -126,8 +131,9 @@ class ChannelGUI {
 		initStyles();
 
 		// reset highlights as soon as we draw anything
-		channelHighlightedNickname = false;
-		channelHighlighted = false;
+		channelHighlightedPrivateMessage = false;
+		channelHighlightedMessage = false;
+		channelHighlightedJoin = false;
 
 		GUILayout.BeginHorizontal();
 			// TODO: get rid of weird margin/padding around drawTextArea() when drawNames() is called
@@ -294,7 +300,7 @@ class ChannelGUI {
 
 				GUILayout.BeginHorizontal();
 					GUILayout.Label(entry.sender, senderStyle, GUILayout.Width(maxNameWidth), GUILayout.MaxWidth(maxNameWidth));
-					GUILayout.Label(entry.text, highlightText(entry.sender, entry.text) ? textHighlightedStyle : textStyle);
+					GUILayout.Label(entry.text, highlightNickname(entry.sender, entry.text) ? textHighlightedStyle : textStyle);
 
 					// handle clicking on links
 					if (entry.link && Input.GetMouseButtonUp(0) &&
@@ -330,7 +336,7 @@ class ChannelGUI {
 		}
 	}
 
-	private bool highlightText(string sender, string text) {
+	private bool highlightNickname(string sender, string text) {
 		return highlightName && (sender != "*") && text.ToLower().Contains(nameLower);
 	}
 
@@ -358,7 +364,7 @@ class ChannelGUI {
 		}
 	}
 
-	public void addToBuffer(string sender, string text) {
+	public void addToBuffer(string sender, string text, IRCCommand cmd = null) {
 		User user = usersForTabCompletion.SingleOrDefault(u => u.name == sender);
 		if (user != null) {
 			usersForTabCompletion.Remove(user);
@@ -379,10 +385,16 @@ class ChannelGUI {
 			}
 		}
 
-		if ((!handle.StartsWith("#") && !handle.StartsWith("(") && !handle.EndsWith(")")) || highlightText(sender, text)) {
-			channelHighlightedNickname = true;
+		if ((!handle.StartsWith("#") && !handle.StartsWith("(") && !handle.EndsWith(")")) || highlightNickname(sender, text)) {
+			channelHighlightedPrivateMessage = true;
 		}
-		channelHighlighted = true;
+		if ((cmd != null) &&
+			((cmd.command == "JOIN") || (cmd.command == "PART") || (cmd.command == "QUIT"))) {
+
+			channelHighlightedJoin = true;
+		} else {
+			channelHighlightedMessage = true;
+		}
 
 		backBufferScrollPosition = new Vector2(0, float.MaxValue);
 	}

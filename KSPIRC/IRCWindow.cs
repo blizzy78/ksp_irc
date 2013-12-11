@@ -38,14 +38,19 @@ class IRCWindow : AbstractWindow {
 		}
 	}
 
-	public bool anyChannelsHighlightedNickname {
+	public bool anyChannelsHighlightedPrivateMessage {
 		get {
-			return channelGUIs.Values.Any(gui => gui.channelHighlightedNickname);
+			return channelGUIs.Values.Any(gui => gui.channelHighlightedPrivateMessage);
 		}
 	}
-	public bool anyChannelsHighlighted {
+	public bool anyChannelsHighlightedMessage {
 		get {
-			return channelGUIs.Values.Any(gui => gui.channelHighlighted);
+			return channelGUIs.Values.Any(gui => gui.channelHighlightedMessage);
+		}
+	}
+	public bool anyChannelsHighlightedJoin {
+		get {
+			return channelGUIs.Values.Any(gui => gui.channelHighlightedJoin);
 		}
 	}
 
@@ -179,9 +184,9 @@ class IRCWindow : AbstractWindow {
 				GUIStyle buttonStyle;
 				if (channelGUI.Equals(currentChannelGUI)) {
 					buttonStyle = buttonActiveStyle;
-				} else if (channelGUI.channelHighlightedNickname) {
+				} else if (channelGUI.channelHighlightedPrivateMessage) {
 					buttonStyle = buttonHighlightedNicknameStyle;
-				} else if (channelGUI.channelHighlighted) {
+				} else if (channelGUI.channelHighlightedMessage) {
 					buttonStyle = buttonHighlightedStyle;
 				} else {
 					buttonStyle = GUI.skin.button;
@@ -220,9 +225,9 @@ class IRCWindow : AbstractWindow {
 		currentChannelGUI = channelGUIs.Values.FirstOrDefault();
 	}
 
-	public void addToChannel(string handle, string sender, string text) {
+	public void addToChannel(string handle, string sender, string text, IRCCommand cmd = null) {
 		ChannelGUI channelGUI = getChannelGUI(handle);
-		channelGUI.addToBuffer(sender, text);
+		channelGUI.addToBuffer(sender, text, cmd);
 
 		// show this channel if no channel is visible yet
 		if (currentChannelGUI == null) {

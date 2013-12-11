@@ -21,6 +21,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using UnityEngine;
+using Toolbar;
 
 [KSPAddonFixed(KSPAddon.Startup.MainMenu, true, typeof(KSPIRC))]
 class KSPIRC : MonoBehaviour {
@@ -41,6 +42,7 @@ class KSPIRC : MonoBehaviour {
 	private RenderingManager renderingManager;
 	private WWW versionWWW;
 	private bool debug;
+	private IButton windowButton;
 
 	KSPIRC() {
 		GameObject.DontDestroyOnLoad(this);
@@ -77,19 +79,34 @@ class KSPIRC : MonoBehaviour {
 			ircWindow.addToChannel("IRC Plugin", "*", "IRC plugin not configured, not connecting to IRC server.");
 			ircWindow.addToChannel("IRC Plugin", "*", "Edit irc.cfg and restart KSP.");
 		}
+
+		windowButton = ToolbarManager.Instance.add("irc", "irc");
+		windowButton.TexturePath = "blizzy/KSPIRC/button-regular";
+		windowButton.ToolTip = "IRC";
+		windowButton.Visibility = new GameScenesVisibility(GameScenes.EDITOR, GameScenes.FLIGHT, GameScenes.SPH, GameScenes.TRACKSTATION);
+		windowButton.OnClick += (e) => toggleIRCWindow();
 	}
 
+	public void OnDestroy() {
+		windowButton.Destroy();
+	}
 
 	#region gui
 
 	public void OnGUI() {
-		if (HighLogic.LoadedScene == GameScenes.SPACECENTER) {
+		// auto-hide window
+		if (!windowButton.Visibility.Visible) {
 			ircWindow.hidden = true;
 		}
 
-		if (showGUI() && (HighLogic.LoadedScene != GameScenes.SPACECENTER)) {
-			drawIRCWindowButton();
-			ircWindow.draw();
+		if (ircWindow.hidden && ircWindow.anyChannelsHighlightedPrivateMessage) {
+			windowButton.TexturePath = "blizzy/KSPIRC/button-pm";
+		} else if (ircWindow.hidden && ircWindow.anyChannelsHighlightedMessage) {
+			windowButton.TexturePath = "blizzy/KSPIRC/button-message";
+		} else if (ircWindow.hidden && ircWindow.anyChannelsHighlightedJoin) {
+			windowButton.TexturePath = "blizzy/KSPIRC/button-join";
+		} else {
+			windowButton.TexturePath = "blizzy/KSPIRC/button-regular";
 		}
 	}
 
@@ -106,40 +123,6 @@ class KSPIRC : MonoBehaviour {
 		return false;
 	}
 
-	private void drawIRCWindowButton() {
-		Rect rect;
-		if ((HighLogic.LoadedScene == GameScenes.EDITOR) || (HighLogic.LoadedScene == GameScenes.SPH)) {
-			rect = new Rect(Screen.width - 125, Screen.height - 25, 50, 25);
-		} else {
-			GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(new Vector3(0, 0, -90)), Vector3.one);
-			rect = new Rect(-470, Screen.width - 25, 50, 25);
-		}
-		GUI.depth = -100;
-		GUIStyle style = new GUIStyle(GUI.skin.button);
-		if ((ircWindow.newVersionAvailable == true) || (ircWindow.hidden && ircWindow.anyChannelsHighlightedNickname)) {
-			style.normal.textColor = Color.yellow;
-			style.onHover.textColor = Color.yellow;
-			style.hover.textColor = Color.yellow;
-			style.onActive.textColor = Color.yellow;
-			style.active.textColor = Color.yellow;
-			style.onFocused.textColor = Color.yellow;
-			style.focused.textColor = Color.yellow;
-		} else if (ircWindow.hidden && ircWindow.anyChannelsHighlighted) {
-			style.normal.textColor = XKCDColors.BlueGrey;
-			style.onHover.textColor = XKCDColors.BlueGrey;
-			style.hover.textColor = XKCDColors.BlueGrey;
-			style.onActive.textColor = XKCDColors.BlueGrey;
-			style.active.textColor = XKCDColors.BlueGrey;
-			style.onFocused.textColor = XKCDColors.BlueGrey;
-			style.focused.textColor = XKCDColors.BlueGrey;
-		}
-		if (GUI.Button(rect, "IRC", style)) {
-			toggleIRCWindow();
-		}
-		GUI.matrix = Matrix4x4.identity;
-		GUI.depth = 0;
-	}
-
 	private void toggleIRCWindow() {
 		ircWindow.hidden = !ircWindow.hidden;
 	}
@@ -150,10 +133,6 @@ class KSPIRC : MonoBehaviour {
 	public void Update() {
 		client.update();
 		checkForNewVersion();
-	}
-
-	public void OnDestroy() {
-		client.disconnect();
 	}
 
 	private void logSendCommand(IRCCommand cmd) {
@@ -248,7 +227,7 @@ class KSPIRC : MonoBehaviour {
 	}
 
 	private void serverCommandJOIN(IRCCommand cmd) {
-		ircWindow.addToChannel(cmd.parameters[0], "*", cmd.shortPrefix + " has joined " + cmd.parameters[0]);
+		ircWindow.addToChannel(cmd.parameters[0], "*", cmd.shortPrefix + " has joined " + cmd.parameters[0], cmd);
 		ircWindow.addSingleChannelName(cmd.parameters[0], cmd.shortPrefix);
 	}
 
@@ -267,7 +246,7 @@ class KSPIRC : MonoBehaviour {
 			if (cmd.parameters.Length > 1) {
 				text += " (" + cmd.parameters[1] + ")";
 			}
-			ircWindow.addToChannel(cmd.parameters[0], "*", text);
+			ircWindow.addToChannel(cmd.parameters[0], "*", text, cmd);
 			ircWindow.removeChannelName(cmd.parameters[0], cmd.shortPrefix);
 		}
 	}
@@ -278,7 +257,7 @@ class KSPIRC : MonoBehaviour {
 			text += " (" + cmd.parameters[0] + ")";
 		}
 		foreach (string handle in ircWindow.getChannelsContainingName(cmd.shortPrefix)) {
-			ircWindow.addToChannel(handle, "*", text);
+			ircWindow.addToChannel(handle, "*", text, cmd);
 			ircWindow.removeChannelName(handle, cmd.shortPrefix);
 		}
 	}
