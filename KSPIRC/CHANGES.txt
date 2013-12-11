@@ -1,4 +1,9 @@
-﻿0.6.1, 2013-11-27
+﻿0.6.2, 2013-12-11
+- Changed IRC button to use the Toolbar Plugin (included in download.)
+- The window resize mouse cursor should now display correctly.
+- The plugin will now respond to CTCP VERSION messages.
+
+0.6.1, 2013-11-27
 - Fixed a bug that prevented sending unknown commands the server.
 
 0.6.0, 2013-11-26

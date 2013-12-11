@@ -26,8 +26,8 @@ using Toolbar;
 [KSPAddonFixed(KSPAddon.Startup.MainMenu, true, typeof(KSPIRC))]
 class KSPIRC : MonoBehaviour {
 	private const string NOTICE_CHANNEL_HANDLE = "(Notice)";
-	private const int VERSION = 7;
-	private const string FULL_VERSION = "0.6.1";
+	private const int VERSION = 8;
+	private const string FULL_VERSION = "0.6.2";
 
 	// debugging
 	private const string DEBUG_CHANNEL_HANDLE = "(Debug)";
