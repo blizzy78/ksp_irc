@@ -1,5 +1,7 @@
 ﻿0.6.2, 2013-12-11
 - Changed IRC button to use the Toolbar Plugin (included in download.)
+- The IRC button will now display in a different color if a user joins,
+  leaves, or quits, to differentiate from regular messages.
 - The window resize mouse cursor should now display correctly.
 - The plugin will now respond to CTCP VERSION messages.
 
