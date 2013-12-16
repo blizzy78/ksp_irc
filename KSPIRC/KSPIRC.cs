@@ -102,12 +102,16 @@ class KSPIRC : MonoBehaviour {
 
 		if (ircWindow.hidden && (ircWindow.anyChannelsHighlightedPrivateMessage || showNewVersionOnButton)) {
 			windowButton.TexturePath = "blizzy/KSPIRC/button-pm";
-		} else if (ircWindow.hidden && ircWindow.anyChannelsHighlightedMessage) {
-			windowButton.TexturePath = "blizzy/KSPIRC/button-message";
-		} else if (ircWindow.hidden && ircWindow.anyChannelsHighlightedJoin) {
-			windowButton.TexturePath = "blizzy/KSPIRC/button-join";
+			windowButton.Important = true;
 		} else {
-			windowButton.TexturePath = "blizzy/KSPIRC/button-regular";
+			if (ircWindow.hidden && ircWindow.anyChannelsHighlightedMessage) {
+				windowButton.TexturePath = "blizzy/KSPIRC/button-message";
+			} else if (ircWindow.hidden && ircWindow.anyChannelsHighlightedJoin) {
+				windowButton.TexturePath = "blizzy/KSPIRC/button-join";
+			} else {
+				windowButton.TexturePath = "blizzy/KSPIRC/button-regular";
+			}
+			windowButton.Important = false;
 		}
 
 		ircWindow.draw();
